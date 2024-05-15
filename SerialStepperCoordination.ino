@@ -8,9 +8,17 @@
 #define zpul 26
 #define zdir 42
 
+int loopCounter = 0;
+int xpos;
+int ypos;
+int zpos;
+
+AccelStepper sx(1,xpul,xdir);
+AccelStepper sy(1,ypul,ydir);
+AccelStepper sz(1,zpul,zdir);
+
 void setup()
 {
-  // put your setup code here, to run once:
   Serial.begin(115200);
   delay(1000);
   Serial.println("setup()");
@@ -18,6 +26,7 @@ void setup()
 
 void loop()
 {
-  Serial.println("loop()");
-  delay( 1000) ;
+  Serial.println("loop("+String(loopCounter)+")");
+  delay(1) ;
+  loopCounter++;
 }
