@@ -1,3 +1,13 @@
+#include <AccelStepper.h>
+#define xpul 24
+#define xdir 30
+
+#define ypul 25
+#define ydir 31
+
+#define zpul 26
+#define zdir 42
+
 void setup()
 {
   // put your setup code here, to run once:
