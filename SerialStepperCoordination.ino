@@ -44,9 +44,9 @@ void setup()
   sx.setCurrentPosition(0);
   sy.setCurrentPosition(0);
   sz.setCurrentPosition(0);
-  gotoposition[0] = 100;
-  gotoposition[1] = 120;
-  gotoposition[2] = 130;
+  gotoposition[0] = -5000;
+  gotoposition[1] = -5200;
+  gotoposition[2] = -5300;
   StepperControl.moveTo(gotoposition);
   StepperControl.runSpeedToPosition();
   delay(200);
