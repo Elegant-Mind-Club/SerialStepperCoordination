@@ -5,11 +5,11 @@
 #define xpul 24
 #define xdir 30
 
-#define ypul 25
-#define ydir 31
+#define ypul 26
+#define ydir 32
 
-#define zpul 26
-#define zdir 42
+#define zpul 25
+#define zdir 31
 
 int loopCounter = 0;
 int xpos;
@@ -20,7 +20,7 @@ AccelStepper sx(1,xpul,xdir);
 AccelStepper sy(1,ypul,ydir);
 AccelStepper sz(1,zpul,zdir);
 MultiStepper StepperControl;
-long gotoposition[3];
+long newpos[3];
 
 void setup()
 {
@@ -44,18 +44,19 @@ void setup()
   sx.setCurrentPosition(0);
   sy.setCurrentPosition(0);
   sz.setCurrentPosition(0);
-  gotoposition[0] = -5000;
-  gotoposition[1] = -5200;
-  gotoposition[2] = -5300;
-  StepperControl.moveTo(gotoposition);
-  StepperControl.runSpeedToPosition();
+  newpos[0] = -30000;
+  newpos[1] = 0;
+  newpos[2] = 0;
+  StepperControl.moveTo(newpos);
+  StepperControl.runSpeedToPosition(); // I think this is grouping the stepper motors together and trying to end them at the same time.
   delay(200);
 }
+
 
 void loop()
 {
   Serial.println("loop("+String(loopCounter)+")");
-  int distance = 100;
+  int distance = -100;
   int speed = 100;
   // sx.setSpeed(speed);
   // sx.moveTo(distance);
@@ -66,10 +67,11 @@ void loop()
   // sz.setSpeed(speed);
   // sz.moveTo(distance);
   // sz.runSpeedToPosition();
-  delay(1) ;
+  // delay(1) ;
   loopCounter++;
   if(loopCounter>=32767){
     Serial.println("Max loopCounter reached!");
     loopCounter = 0;
   }
 }
+
