@@ -30,6 +30,12 @@ AccelStepper sz(1,zpul,zdir);
 
 long newpos[3];
 
+//serial tracking
+bool finished_move = true;
+float start_time;
+int index = 0;
+String pos;
+
 void setup()
 {
   pinMode(switch_pin, INPUT);
@@ -53,48 +59,91 @@ void setup()
 // Moving based on speed
 void loop()
 {
-  xspeed = map(analogRead(A0), 0, 1023, -30000, 30000);
-  yspeed = map(analogRead(A1), 0, 1023, -30000, 30000);
-  zspeed = map(analogRead(A1), 0, 1023, -30000, 30000); // Change this pin
-  sw = digitalRead(switch_pin);
-  on = 0;
-
-  if (sw == LOW){
-    if(-3000 < zspeed && zspeed < 3000){ // Threshold 30
+  // xspeed = map(analogRead(A0), 0, 1023, -30000, 30000);
+  // yspeed = map(analogRead(A1), 0, 1023, -30000, 30000);
+  // zspeed = map(analogRead(A1), 0, 1023, -30000, 30000); // Change this pin
+  // sw = digitalRead(switch_pin);
+  // on = 0;
+  while(Serial.available()> 0){
+    char input = Serial.read();
+    if(input == ',' && index < 2) //read pos terms before end of line, max 3 directions = max 2 directions end with comma
+    {
+      newpos[index] = pos.toFloat();
+      Serial.println(String(newpos[index]));
+      index++;
+      pos = "";
+    }
+    else if(input == '\n') 
+    {
+      //record last pos
+      newpos[index] = pos.toFloat();
+      Serial.println(String(newpos[index]));
+      index++;
+      pos = "";
+      //send command
+      xpos = newpos[0];
+      ypos = newpos[1];
+      zpos = newpos[2];
+      // sx.setSpeed(sx.currentPosition() + xpos);
+      // sy.setSpeed(sy.currentPosition() + ypos);
+      // sz.setSpeed(sz.currentPosition() + zpos);
+      //start_time = millis(); //ms
+      finished_move = run(xpos,ypos,zpos);
+      //Serial.println("Moving to x: " + String(xpos) + "; y: " + String(ypos) + "; z: " + String(zpos));
+      //reset variables
+      if(finished_move)
+      {
+        finished_move = false;
+        index = 0;
+        for(int i=0;i<3;i++)
+        {
+          newpos[i]=0;
+        }
+      }
+    }
+    else //collect char of same pos term in one string
+    {
+      pos = pos + input;
+    }
+  }
+}
+boolean run(float x,float y,float z)
+{
+  if(!sx.runSpeed() && !sy.runSpeed() && !sz.runSpeed())
+  {
+    return true;
+  }
+  if(-1000 < zspeed && zspeed < 1000){ // Threshold 30
       zspeed = 0;
       sz.setSpeed(0);
       sz.runSpeed();
-    }
-    else{
+  }
+  else{
       sz.setSpeed(zspeed);
       sz.runSpeed();
-    }
-
   }
-  
-  else{
-    // fix stick drift
-    if(-3000 < xspeed && xspeed < 3000){ // Threshold 30
-      xspeed = 0;
-      sx.setCurrentPosition(0);
-      sx.setSpeed(0);
-      sx.runSpeed();
-    }
-    else{
-      sx.setSpeed(sz.currentPosition() + xspeed);
-      sx.runSpeed();
-    }
 
-    if(-3000 < yspeed && yspeed < 3000){ // Threshold 15
-      yspeed = 0;
-      sy.setSpeed(0);
-      sy.runSpeed();
-    }
-    else{
-      sy.setSpeed(zspeed);
-      sy.runSpeed();
-    }
-  }  
+  if(-1000 < xspeed && xspeed < 1000){ // Threshold 30
+    xspeed = 0;
+    sx.setCurrentPosition(0);
+    sx.setSpeed(0);
+    sx.runSpeed();
+  }
+  else{
+    sx.setSpeed(sz.currentPosition() + xspeed);
+    sx.runSpeed();
+  }
+
+  if(-1000 < yspeed && yspeed < 1000){ // Threshold 15
+    yspeed = 0;
+    sy.setSpeed(0);
+    sy.runSpeed();
+  }
+  else{
+    sy.setSpeed(zspeed);
+    sy.runSpeed();
+  }
+}
   
   // Printing pos values
     // Serial.print("X-axis:  ");
@@ -106,7 +155,6 @@ void loop()
     // Serial.print("Z-axis:  ");
     // Serial.println(zpos);
   // 
-}
 
 // Moving based on position
 // void loop()
