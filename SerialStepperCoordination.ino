@@ -53,7 +53,7 @@ void setup()
   sz.setMaxSpeed(100000);
   // sz.setAcceleration(25000);
 
-  // Serial.begin(115200);
+  Serial.begin(115200);
 }
 
 // Moving based on speed
@@ -66,6 +66,8 @@ void loop()
   // on = 0;
   while(Serial.available()> 0){
     char input = Serial.read();
+    Serial.println("read");
+    Serial.println(input);
     if(input == ',' && index < 2) //read pos terms before end of line, max 3 directions = max 2 directions end with comma
     {
       newpos[index] = pos.toFloat();
@@ -73,7 +75,7 @@ void loop()
       index++;
       pos = "";
     }
-    else if(input == '\n') 
+    else if(input == '\\') 
     {
       //record last pos
       newpos[index] = pos.toFloat();
@@ -88,31 +90,30 @@ void loop()
       // sy.setSpeed(sy.currentPosition() + ypos);
       // sz.setSpeed(sz.currentPosition() + zpos);
       //start_time = millis(); //ms
-      finished_move = run(xpos,ypos,zpos);
-      //Serial.println("Moving to x: " + String(xpos) + "; y: " + String(ypos) + "; z: " + String(zpos));
-      //reset variables
-      if(finished_move)
-      {
-        finished_move = false;
-        index = 0;
-        for(int i=0;i<3;i++)
-        {
-          newpos[i]=0;
-        }
-      }
+      // finished_move = run(xpos,ypos,zpos);
+      run(xpos,ypos,zpos);
+      Serial.println("Moving to x: " + String(xpos) + "; y: " + String(ypos) + "; z: " + String(zpos));
+      // //reset variables
+      // if(finished_move)
+      // {
+      //   finished_move = false;
+      index = 0; 
+      
+        // for(int i=0;i<3;i++)
+        // {
+        //   newpos[i]=0;
+        // }
     }
     else //collect char of same pos term in one string
     {
+      Serial.println("add_num");
       pos = pos + input;
     }
   }
 }
-boolean run(float x,float y,float z)
+
+boolean run(float xspeed,float yspeed,float zspeed)
 {
-  if(!sx.runSpeed() && !sy.runSpeed() && !sz.runSpeed())
-  {
-    return true;
-  }
   if(-1000 < zspeed && zspeed < 1000){ // Threshold 30
       zspeed = 0;
       sz.setSpeed(0);
@@ -122,15 +123,14 @@ boolean run(float x,float y,float z)
       sz.setSpeed(zspeed);
       sz.runSpeed();
   }
-
+  
   if(-1000 < xspeed && xspeed < 1000){ // Threshold 30
     xspeed = 0;
-    sx.setCurrentPosition(0);
     sx.setSpeed(0);
     sx.runSpeed();
   }
   else{
-    sx.setSpeed(sz.currentPosition() + xspeed);
+    sx.setSpeed(xspeed);
     sx.runSpeed();
   }
 
@@ -140,9 +140,15 @@ boolean run(float x,float y,float z)
     sy.runSpeed();
   }
   else{
-    sy.setSpeed(zspeed);
+    sy.setSpeed(yspeed);
     sy.runSpeed();
   }
+
+  // if(!sx.runSpeed() && !sy.runSpeed() && !sz.runSpeed())
+  // {
+  //   return true;
+  // }
+
 }
   
   // Printing pos values
